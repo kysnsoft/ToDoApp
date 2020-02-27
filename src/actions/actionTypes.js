@@ -1,0 +1,10 @@
+export const ADD_TODO = 'ADD_TODO'
+export const TOGGLE_TODO = 'TOGGLE_TODO'
+export const DIALOG_TODO = 'DIALOG_TODO'
+export const DELETE_TODO = 'DELETE_TODO'
+export const EDIT_TODO = 'EDIT_TODO'
+export const COUNTER_INCREMENT = 'COUNTER_INCREMENT'
+export const COUNTER_DECREMENT = 'COUNTER_DECREMENT'
+export const INCREASE_PRIOR = 'INCREASE_PRIOR'
+
+export const SEARCH_TODO = 'SEARCH_TODO'
