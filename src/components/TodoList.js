@@ -67,10 +67,12 @@ const TodoList = ({ todos, toggleTodo, dialogTodo, deleteTodo, editTodo, increas
                 platform='ios'
                 onChangeText={setSearch}
                 value={search}
+                inputContainerStyle={{ backgroundColor: '#eaeaea' }}
+                containerStyle={{ margin: 5, height: 50 }}
             />
             <AddTodo />
 
-            <ScrollView style={{ margin: 20, flexGrow: 1, marginBottom: 'auto' }}>
+            <ScrollView style={{ margin: 15, flexGrow: 1, marginBottom: 'auto' }}>
                 {sortTodo.map(
                     todo => {
                         const handleDelete = (e) => {
@@ -86,7 +88,7 @@ const TodoList = ({ todos, toggleTodo, dialogTodo, deleteTodo, editTodo, increas
                         }
                         return (
                             <View key={todo.id} >
-                                < TouchableOpacity onPress={() => increasePrior(todo.id)}
+                                < TouchableOpacity onLongPress={() => increasePrior(todo.id)}
                                     style={[styles.listItem, {
                                         marginBottom: 5,
                                         borderLeftWidth: todo.completed ? 10 : todo.level ? 15 : 0,
@@ -101,7 +103,7 @@ const TodoList = ({ todos, toggleTodo, dialogTodo, deleteTodo, editTodo, increas
                                             style={{ marginTop: 10 }} />}
                                         <TextInput multiline={true}
                                             style={{
-                                                width: 250,
+                                                width: '80%',
                                                 fontSize: 18, marginBottom: 5,
                                                 textDecorationLine: todo.completed ? 'line-through' : 'none',
                                                 color: todo.completed ? 'green' : 'black',
