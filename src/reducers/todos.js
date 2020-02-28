@@ -1,4 +1,4 @@
-import { ADD_TODO, TOGGLE_TODO, DIALOG_TODO, DELETE_TODO, EDIT_TODO, INCREASE_PRIOR } from '../actions/actionTypes'
+import { ADD_TODO, TOGGLE_TODO, DISPLAY_TODO, DIALOG_TODO, DELETE_TODO, EDIT_TODO, INCREASE_PRIOR } from '../actions/actionTypes'
 
 const todos = (state = [], action) => {
 
@@ -8,12 +8,16 @@ const todos = (state = [], action) => {
                 id: action.id,
                 text: action.text,
                 completed: false,
+                display: false,
                 dialog: false,
                 level: false
             }]
         case TOGGLE_TODO:
             return state.map(todo => (todo.id === action.id) ?
                 { ...todo, completed: !todo.completed } : todo)
+        case DISPLAY_TODO:
+            return state.map(todo => (todo.id === action.id) ?
+                { ...todo, display: !todo.display } : todo)
         case DIALOG_TODO:
             return state.map(todo => (todo.id === action.id) ?
                 { ...todo, dialog: !todo.dialog } : todo)

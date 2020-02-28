@@ -1,4 +1,4 @@
-import { ADD_TODO, TOGGLE_TODO, DIALOG_TODO, DELETE_TODO, EDIT_TODO, INCREASE_PRIOR, SEARCH_TODO } from './actionTypes'
+import { ADD_TODO, TOGGLE_TODO, DISPLAY_TODO, DIALOG_TODO, DELETE_TODO, EDIT_TODO, INCREASE_PRIOR, SEARCH_TODO } from './actionTypes'
 
 function guidGenerator() {
     var S4 = function () {
@@ -18,6 +18,10 @@ export const toggleTodo = (id) => ({
     id
 })
 
+export const displayTodo = (id) => ({
+    type: DISPLAY_TODO,
+    id
+})
 export const dialogTodo = (id) => ({
     type: DIALOG_TODO,
     id

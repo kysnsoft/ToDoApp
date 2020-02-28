@@ -15,10 +15,7 @@ import Dialog from "react-native-dialog";
 import _ from 'lodash'
 
 
-const TodoList = ({ todos, toggleTodo, dialogTodo, deleteTodo, editTodo, increasePrior, searchTodo }) => {
-
-    const [editText, setEdit] = useState('')
-    const onChange = editText => setEdit(editText)
+const TodoList = ({ todos, toggleTodo, displayTodo, dialogTodo, deleteTodo, editTodo, increasePrior, searchTodo }) => {
 
     const useDebounce = (value, delay) => {
         const [debounceValue, setDebounceValue] = useState(value);
@@ -35,8 +32,11 @@ const TodoList = ({ todos, toggleTodo, dialogTodo, deleteTodo, editTodo, increas
 
         return debounceValue;
     };
-    const [search, setSearch] = useState('')
 
+    const [editText, setEdit] = useState('')
+    const onChange = editText => setEdit(editText)
+
+    const [search, setSearch] = useState('')
     const debounceSearch = useDebounce(search, 300)
 
     const sortTodo = _.orderBy(todos, ['completed', 'level'], ['asc', 'desc'])
@@ -88,30 +88,31 @@ const TodoList = ({ todos, toggleTodo, dialogTodo, deleteTodo, editTodo, increas
                         }
                         return (
                             <View key={todo.id} >
-                                < TouchableOpacity onLongPress={() => increasePrior(todo.id)}
+                                < TouchableOpacity onLongPress={() => increasePrior(todo.id)} onPress={() => displayTodo(todo.id)}
                                     style={[styles.listItem, {
+                                        padding: 30,
                                         marginBottom: 5,
-                                        borderLeftWidth: todo.completed ? 10 : todo.level ? 15 : 0,
-                                        borderRightWidth: todo.completed ? 0 : todo.level ? 15 : 0,
+                                        borderLeftWidth: todo.completed ? 10 : todo.level ? 10 : 0,
+                                        borderRightWidth: todo.completed ? 0 : todo.level ? 10 : 0,
                                         borderColor: todo.completed ? 'green' : 'red',
                                         borderBottomColor: todo.completed ? 'green' : '#ff6700',
                                     }]}
                                 >
 
-                                    <TouchableOpacity onPress={() => toggleTodo(todo.id)} style={{ flexDirection: 'row', flex: 1 }}>
-                                        {todo.completed && <Icon size={25} color="green" name="check"
-                                            style={{ marginTop: 10 }} />}
-                                        <TextInput multiline={true}
+                                    <TouchableOpacity style={{ flexDirection: 'row', flex: 1 }}>
+                                        {todo.completed && <Icon size={25} color="green" name="check" style={{ flex: 0.1 }} />}
+                                        <Text
+                                            onPress={() => toggleTodo(todo.id)}
+                                            numberOfLines={todo.display ? 5 : 1}
                                             style={{
-                                                width: '80%',
-                                                fontSize: 18, marginBottom: 5,
+                                                flex: 0.8, fontSize: 18,
                                                 textDecorationLine: todo.completed ? 'line-through' : 'none',
                                                 color: todo.completed ? 'green' : 'black',
                                                 fontWeight: todo.completed ? 'normal' : todo.level ? 'bold' : 'normal'
-                                            }} value={todo.text} editable={false} />
+                                            }}  >{todo.text}</Text>
                                         {todo.level && <Icon size={25} name="star"
                                             color={todo.completed ? 'green' : 'red'}
-                                            style={{ marginTop: 10 }} />}
+                                            style={{ flex: 0.1 }} />}
                                     </TouchableOpacity>
                                     <TouchableOpacity style={styles.btnDelete} onPress={() => { handleDelete(todo); }}>
                                         <View style={styles.iconView}>
