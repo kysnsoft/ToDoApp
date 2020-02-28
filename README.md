@@ -1,17 +1,17 @@
 # React-Native ToDoApp with Redux
 Week 2 React Native Project
 
-## To mark important tasks
+## Mark important tasks
 Long press at the panel  
 ![](image/normalTask.png)
 ![](image/importantTask.png)
 
-## To mark as done
+## Mark as done
 Press on the text  
 ![](image/markAsDone(before).png)
 ![](image/markAsDone.PNG)
 
-## To display full text (ellipsize text)
+## Display full text (ellipsize text)
 Press at the panel  
 ![](image/ellipsize(before).png)
 ![](image/ellipsize(after).PNG)
