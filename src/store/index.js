@@ -6,11 +6,15 @@ import AsyncStorage from '@react-native-community/async-storage';
 
 const persistConfig = {
     key: 'primary',
-    storage: AsyncStorage
+    storage: AsyncStorage,
+    whitelist: ['searchReducer','todos'],
+
 };
 
-const middleware =[]
+
+const middleware = []
 const persistedReducer = persistReducer(persistConfig, rootReducer);
+
 const store = createStore(
     persistedReducer,
     undefined,
@@ -21,5 +25,6 @@ const store = createStore(
         )
     )
 )
+console.log(store)
 const persistor = persistStore(store);
 export { persistor, store };

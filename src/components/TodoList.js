@@ -39,11 +39,21 @@ const TodoList = ({ todos, toggleTodo, displayTodo, dialogTodo, deleteTodo, edit
     const [search, setSearch] = useState('')
     const debounceSearch = useDebounce(search, 300)
 
+    const [editDialog, setEditDialog] = useState(false)
+    const [tempId, setTempId] = useState('')
+    const [tempText, setTempText] = useState('')
+
     const sortTodo = _.orderBy(todos, ['completed', 'level'], ['asc', 'desc'])
 
     useEffect(() => {
         searchTodo(debounceSearch)
     }, [debounceSearch])
+
+
+    const handleEdit = (id, text) => {
+        setTempId(id)
+        setTempText(text)
+    }
 
     return (
         <React.Fragment>
@@ -78,7 +88,7 @@ const TodoList = ({ todos, toggleTodo, displayTodo, dialogTodo, deleteTodo, edit
                         const handleDelete = (e) => {
                             Alert.alert(
                                 'Confirm Delete?',
-                                (e.text),
+                                (todo.text),
                                 [
                                     { text: 'Ask me later', onPress: () => console.log('Ask me later pressed') },
                                     { text: 'Cancel', onPress: () => console.log('Cancel Pressed') },
@@ -86,6 +96,8 @@ const TodoList = ({ todos, toggleTodo, displayTodo, dialogTodo, deleteTodo, edit
                                 ],
                             )
                         }
+
+
                         return (
                             <View key={todo.id} >
                                 < TouchableOpacity onLongPress={() => increasePrior(todo.id)} onPress={() => displayTodo(todo.id)}
@@ -114,13 +126,13 @@ const TodoList = ({ todos, toggleTodo, displayTodo, dialogTodo, deleteTodo, edit
                                             color={todo.completed ? 'green' : 'red'}
                                             style={{ flex: 0.1 }} />}
                                     </TouchableOpacity>
-                                    <TouchableOpacity style={styles.btnDelete} onPress={() => { handleDelete(todo); }}>
+                                    <TouchableOpacity style={styles.btnDelete} onPress={() => { handleDelete(todo.id); }}>
                                         <View style={styles.iconView}>
                                             <Icon size={25} color={todo.completed ? "green" : "#de9595"} name="cross"
                                                 style={styles.icon} />
                                         </View>
                                     </TouchableOpacity>
-                                    <TouchableOpacity style={styles.btnEdit} onPress={() => dialogTodo(todo.id)}>
+                                    <TouchableOpacity style={styles.btnEdit} onPress={() => { setEditDialog(true); handleEdit(todo.id, todo.text); }}>
                                         <View style={styles.iconView}>
                                             <Icon size={25} color={todo.completed ? "green" : "#de9595"} name="edit"
                                                 style={styles.icon} />
@@ -128,21 +140,22 @@ const TodoList = ({ todos, toggleTodo, displayTodo, dialogTodo, deleteTodo, edit
                                     </TouchableOpacity>
                                 </TouchableOpacity>
 
-                                <Dialog.Container visible={todo.dialog ? true : false}>
-                                    <Dialog.Title style={{ fontWeight: 'bold' }}>Edit Todo: </Dialog.Title>
-                                    <Dialog.Input
-                                        placeholder={todo.text}
-                                        onChangeText={onChange}
-                                        style={{ borderBottomWidth: 1, margin: 10 }}
-                                    />
-                                    <Dialog.Button label="Cancel" onPress={() => dialogTodo(todo.id)} />
-                                    <Dialog.Button label="Edit" onPress={() => { dialogTodo(todo.id); editTodo(todo.id, editText) }} />
-                                </Dialog.Container>
+
                             </View>
                         )
                     })
                 }
             </ScrollView>
+            <Dialog.Container visible={editDialog}>
+                <Dialog.Title style={{ fontWeight: 'bold' }}>Edit Todo: </Dialog.Title>
+                <Dialog.Input
+                    placeholder={tempText}
+                    onChangeText={onChange}
+                    style={{ borderBottomWidth: 1, margin: 10 }}
+                />
+                <Dialog.Button label="Cancel" onPress={() => setEditDialog(false)} />
+                <Dialog.Button label="Edit" onPress={() => { setEditDialog(false); editTodo(tempId, editText) }} />
+            </Dialog.Container>
         </React.Fragment >
     )
 }
