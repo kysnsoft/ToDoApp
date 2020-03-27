@@ -1,30 +1,79 @@
-import { ADD_TODO, TOGGLE_TODO, DISPLAY_TODO, DELETE_TODO, EDIT_TODO, INCREASE_PRIOR } from '../actions/actionTypes'
+import { ADD_TODO, TOGGLE_TODO, DELETE_TODO, EDIT_TODO, IMPORTANT_TODO } from '../actions/actionTypes'
 
+const date1 = new Date()
+const date2 = new Date()
+const date3 = new Date()
+date1.setDate(date1.getDate() + 1);
+date2.setDate(date1.getDate() + 2);
+date3.setDate(date2.getDate() + 3);
 
-const todos = (state = [], action) => {
-    switch (action.type) {
+const initialState = [
+    {
+        id: 'Important1',
+        title: 'Every task should include the following fields',
+        desc: '-Title\nDescription\nStartDate/ EndDate',
+        startDate: date1,
+        endDate: date2,
+        completed: '',
+        important: true,
+        user: 'Anonymous',
+    },
+    {
+        id: 'Completed1',
+        title: 'Full screen',
+        desc: '-Remove status bar\n-Remove navigation bar',
+        startDate: date1,
+        endDate: date2,
+        completed: date1,
+        important: false,
+        user: 'Anonymous',
+    },
+    {
+        id: 'Task1',
+        title: 'Testing Purpose',
+        desc: 'Did I miss out any requirements',
+        startDate: date2,
+        endDate: date3,
+        completed: '',
+        important: false,
+        user: 'Anonymous',
+    }
+
+]
+const todos = (state = initialState, { type, id, task, user, completeTime }) => {
+    switch (type) {
         case ADD_TODO:
             return [...state, {
-                id: action.id,
-                text: action.text,
-                completed: false,
-                display: false,
-                level: false
+                id,
+                title: task.title,
+                desc: task.desc,
+                startDate: task.startDate,
+                endDate: task.endDate,
+                completed: '',
+                important: false,
+                user
             }]
-        case TOGGLE_TODO:
-            return state.map(todo => (todo.id === action.id) ?
-                { ...todo, completed: !todo.completed } : todo)
-        case DISPLAY_TODO:
-            return state.map(todo => (todo.id === action.id) ?
-                { ...todo, display: !todo.display } : todo)
+        case TOGGLE_TODO: {
+            return state.map(todo => (todo.id === id) ?
+                { ...todo, completed: todo.completed === '' ? completeTime : '' } : todo)
+        }
         case DELETE_TODO:
-            return state.filter(todo => todo.id !== action.id);
+            return state.filter(todo => todo.id !== id);
         case EDIT_TODO:
-            return state.map(todo => (todo.id === action.id) ?
-                { ...todo, text: action.text } : todo)
-        case INCREASE_PRIOR:
-            return state.map(todo => (todo.id === action.id) ?
-                { ...todo, level: !todo.level } : todo)
+            return state.map(todo =>
+                (todo.id === id) ?
+                    {
+                        ...todo,
+                        title: task.title,
+                        desc: task.desc,
+                        startDate: task.startDate,
+                        endDate: task.endDate,
+                        important: task.important,
+                        completed: task.completed
+                    } : todo)
+        case IMPORTANT_TODO:
+            return state.map(todo => (todo.id === id) ?
+                { ...todo, important: !todo.important } : todo)
         default:
             return state
     }

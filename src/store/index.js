@@ -7,7 +7,7 @@ import AsyncStorage from '@react-native-community/async-storage';
 const persistConfig = {
     key: 'primary',
     storage: AsyncStorage,
-    whitelist: ['searchReducer','todos'],
+    whitelist: ['todos', 'users'],
 
 };
 
@@ -25,6 +25,5 @@ const store = createStore(
         )
     )
 )
-console.log(store)
 const persistor = persistStore(store);
 export { persistor, store };

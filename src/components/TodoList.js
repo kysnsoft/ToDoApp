@@ -1,21 +1,32 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import {
     StyleSheet,
     Text,
     View,
     TouchableOpacity,
     ScrollView,
-    TextInput,
     Alert
 } from 'react-native'
-import { SearchBar } from 'react-native-elements';
+import { SearchBar, CheckBox } from 'react-native-elements';
 import AddTodo from '../containers/AddTodo'
 import Icon from 'react-native-vector-icons/Entypo'
-import Dialog from "react-native-dialog";
 import _ from 'lodash'
+import { useSelector, useDispatch } from 'react-redux'
+import { logoutUser } from '../actions/index'
+import moment from 'moment'
 
 
-const TodoList = ({ todos, toggleTodo, displayTodo, dialogTodo, deleteTodo, editTodo, increasePrior, searchTodo }) => {
+const TodoList = ({ ownProps, todos, toggleTodo, deleteTodo, importantTodo, searchTodo }) => {
+
+    const currentDate = new Date()
+
+
+    const dispatch = useDispatch()
+    const users = useSelector(state => state.users)
+    const currentUser = users.find(user => user.isLogged === true).userName
+    const userTodos = todos.filter(todo => todo.user === currentUser)
+
+    const { navHandler } = ownProps
 
     const useDebounce = (value, delay) => {
         const [debounceValue, setDebounceValue] = useState(value);
@@ -33,62 +44,58 @@ const TodoList = ({ todos, toggleTodo, displayTodo, dialogTodo, deleteTodo, edit
         return debounceValue;
     };
 
-    const [editText, setEdit] = useState('')
-    const onChange = editText => setEdit(editText)
-
+    ////Search
     const [search, setSearch] = useState('')
     const debounceSearch = useDebounce(search, 300)
-
-    const [editDialog, setEditDialog] = useState(false)
-    const [tempId, setTempId] = useState('')
-    const [tempText, setTempText] = useState('')
-
-    const sortTodo = _.orderBy(todos, ['completed', 'level'], ['asc', 'desc'])
-
     useEffect(() => {
         searchTodo(debounceSearch)
     }, [debounceSearch])
+    ////Search
 
+    //Sort according completed, important, due date
+    const sortTodo = _.orderBy(userTodos, ['completed', 'important',
+        function (o) { return new moment(o.endDate) }, ['asc']], ['asc', 'desc'])
 
-    const handleEdit = (id, text) => {
-        setTempId(id)
-        setTempText(text)
+    const totalTask = sortTodo.filter(todo => todo.completed === '').length
+
+    const logout = (currentUser) => {
+        Alert.alert(
+            'Confirm Logout?',
+            totalTask > 0 ? `${totalTask} TASK INCOMPLETED` : `Well done, you have done all the task!`,
+            [
+                { text: 'Ask me later', onPress: () => console.log('Ask me later pressed') },
+                { text: 'Cancel', onPress: () => console.log('Cancel Pressed') },
+                { text: 'OK', onPress: () => dispatch(logoutUser(currentUser)) },
+            ],
+        )
     }
 
     return (
-        <React.Fragment>
-            <View style={{
-                flexDirection: 'row', backgroundColor: 'rgba(21,21,35,0.618)',
-                paddingTop: 10
-            }}>
-                <Text style={{
-                    fontSize: 35, marginLeft: 30, marginBottom: 10,
-                    fontWeight: 'bold'
-                }}> ToDo</Text>
-
-                {sortTodo.filter(todo => todo.completed === false).length > 0 && <Text style={{
-                    fontSize: 20, marginLeft: 'auto', marginRight: 20,
-                    textAlignVertical: 'center'
-                }}>{sortTodo.filter(todo => todo.completed === false).length}个未完成</Text>}
-
+        <View style={styles.container}>
+            <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'flex-end', margin: 5 }}>
+                <Text style={styles.smallText}>Welcome back, </Text>
+                <Text style={[styles.smallText, { fontWeight: 'bold' }]}>{currentUser}</Text>
+                <TouchableOpacity onPress={() => logout(currentUser)}>
+                    <Icon size={30} color="#4b191b" name="log-out"
+                        style={{ paddingHorizontal: 15 }} />
+                </TouchableOpacity>
             </View>
             <SearchBar
-                placeholder="Search your task...."
+                placeholder="Search your task..."
                 platform='ios'
                 onChangeText={setSearch}
                 value={search}
                 inputContainerStyle={{ backgroundColor: '#eaeaea' }}
                 containerStyle={{ margin: 5, height: 50 }}
             />
-            <AddTodo />
 
-            <ScrollView style={{ margin: 15, flexGrow: 1, marginBottom: 'auto' }}>
+            <ScrollView style={styles.scrollView}>
                 {sortTodo.map(
                     todo => {
-                        const handleDelete = (e) => {
+                        const handleDelete = () => {
                             Alert.alert(
                                 'Confirm Delete?',
-                                (todo.text),
+                                (todo.title),
                                 [
                                     { text: 'Ask me later', onPress: () => console.log('Ask me later pressed') },
                                     { text: 'Cancel', onPress: () => console.log('Cancel Pressed') },
@@ -97,96 +104,122 @@ const TodoList = ({ todos, toggleTodo, displayTodo, dialogTodo, deleteTodo, edit
                             )
                         }
 
+                        const displayDetail = (task) => {
+                            const msg =
+                                `${task.desc} \n\nDue: ${moment(task.endDate).format('ddd, MMM Do YYYY')}`
+                            Alert.alert(
+                                `${task.title}`,
+                                msg,
+                                [
+                                    { text: `${task.important ? 'unstar' : 'star'}`, onPress: () => importantTodo(task.id), style: 'cancel' },
+                                    { text: 'Cancel', onPress: () => console.log('Cancel Pressed') },
+                                    { text: `Mark ${task.completed !== '' ? 'undone' : 'done'}`, onPress: () => toggleTodo(todo.id) },
+
+                                ],
+                            )
+                        }
 
                         return (
-                            <View key={todo.id} >
-                                < TouchableOpacity onLongPress={() => increasePrior(todo.id)} onPress={() => displayTodo(todo.id)}
-                                    style={[styles.listItem, {
-                                        padding: 30,
-                                        marginBottom: 5,
-                                        borderLeftWidth: todo.completed ? 10 : todo.level ? 10 : 0,
-                                        borderRightWidth: todo.completed ? 0 : todo.level ? 10 : 0,
-                                        borderColor: todo.completed ? 'green' : 'red',
-                                        borderBottomColor: todo.completed ? 'green' : '#ff6700',
-                                    }]}
+                            <View key={todo.id} style={{ flex: 1 }} >
+                                < TouchableOpacity
+                                    style={[styles.listItem,
+                                    todo.completed !== '' ?
+                                        styles.listCompletedItem : todo.important ?
+                                            styles.listImportantItem : '']}
+                                    onPress={() => displayDetail(todo)}
                                 >
-
-                                    <TouchableOpacity style={{ flexDirection: 'row', flex: 1 }}>
-                                        {todo.completed && <Icon size={25} color="green" name="check" style={{ flex: 0.1 }} />}
+                                    <CheckBox checked={todo.completed !== '' ? true : false} size={15} onPress={() => toggleTodo(todo.id, currentDate)}
+                                        checkedColor='green' uncheckedColor='black' />
+                                    <View style={{ flex: 0.85, alignSelf: 'stretch', justifyContent: 'space-around' }}>
                                         <Text
-                                            onPress={() => toggleTodo(todo.id)}
-                                            numberOfLines={todo.display ? 5 : 1}
-                                            style={{
-                                                flex: 0.8, fontSize: 18,
-                                                textDecorationLine: todo.completed ? 'line-through' : 'none',
-                                                color: todo.completed ? 'green' : 'black',
-                                                fontWeight: todo.completed ? 'normal' : todo.level ? 'bold' : 'normal'
-                                            }}  >{todo.text}</Text>
-                                        {todo.level && <Icon size={25} name="star"
-                                            color={todo.completed ? 'green' : 'red'}
-                                            style={{ flex: 0.1 }} />}
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.btnDelete} onPress={() => { handleDelete(todo.id); }}>
-                                        <View style={styles.iconView}>
-                                            <Icon size={25} color={todo.completed ? "green" : "#de9595"} name="cross"
+                                            style={[{ fontSize: 16, color: 'black', fontWeight: '700' },
+                                            todo.completed !== '' ? styles.completed : ""]}>{todo.title}
+                                        </Text>
+                                        {todo.completed === '' ?
+                                            <Text
+                                                style={[{ fontSize: 13, color: 'red', fontWeight: 'bold' },
+                                                todo.completed !== '' ? styles.completed : ""]}>
+                                                Due: {moment(todo.endDate).startOf('day').fromNow()} on {moment(todo.endDate).format('dddd')}
+                                            </Text> :
+                                            <Text
+                                                style={{ fontSize: 13, color: 'green', fontWeight: 'bold' }}>
+                                                Done in: {moment(todo.completed).format('ddd, MMM Do YYYY')}
+                                            </Text>
+                                        }
+                                    </View>
+                                    {todo.important && <Icon size={25} name="star"
+                                        color={todo.completed !== '' ? 'green' : '#4b191b'}
+                                        style={{ flex: 0.1 }} />}
+
+                                    <View style={{ flex: 0.15 }}>
+                                        <TouchableOpacity onPress={() => { handleDelete(todo.id); }}>
+                                            <Icon size={25} color={todo.completed !== '' ? "green" : "#4b191b"} name="trash"
                                                 style={styles.icon} />
-                                        </View>
-                                    </TouchableOpacity>
-                                    <TouchableOpacity style={styles.btnEdit} onPress={() => { setEditDialog(true); handleEdit(todo.id, todo.text); }}>
-                                        <View style={styles.iconView}>
-                                            <Icon size={25} color={todo.completed ? "green" : "#de9595"} name="edit"
+                                        </TouchableOpacity>
+                                        <TouchableOpacity onPress={() => navHandler(todo.id, todo)}>
+                                            <Icon size={25} color={todo.completed !== '' ? "green" : "#4b191b"} name="edit"
                                                 style={styles.icon} />
-                                        </View>
-                                    </TouchableOpacity>
+                                        </TouchableOpacity>
+                                    </View>
                                 </TouchableOpacity>
-
-
                             </View>
                         )
                     })
                 }
             </ScrollView>
-            <Dialog.Container visible={editDialog}>
-                <Dialog.Title style={{ fontWeight: 'bold' }}>Edit Todo: </Dialog.Title>
-                <Dialog.Input
-                    placeholder={tempText}
-                    onChangeText={onChange}
-                    style={{ borderBottomWidth: 1, margin: 10 }}
-                />
-                <Dialog.Button label="Cancel" onPress={() => setEditDialog(false)} />
-                <Dialog.Button label="Edit" onPress={() => { setEditDialog(false); editTodo(tempId, editText) }} />
-            </Dialog.Container>
-        </React.Fragment >
+
+            {/* ----------------Add ToDo---------------- */}
+            <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                {totalTask > 0 &&
+                    <Text style={{ flex: 1, marginLeft: 10, fontSize: 25, fontWeight: 'bold', color: '#3b191b' }}>
+                        {totalTask} / {sortTodo.length} Tasks</Text>}
+                <AddTodo currentUser={currentUser} />
+            </View>
+            {/* ----------------Add ToDo---------------- */}
+        </View>
     )
 }
 
 export default TodoList
 
 const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    scrollView: {
+        padding: 10,
+        margin: 10,
+        flexGrow: 1,
+    },
     listItem: {
         backgroundColor: '#eaeaea',
         borderBottomWidth: 1,
-        padding: 20,
-        flexDirection: 'row'
+        flexDirection: 'row',
+        borderRadius: 10,
+        marginBottom: 5,
+        padding: 5,
+        alignItems: 'center'
     },
-
-    btnDelete: {
-        position: 'absolute',
-        top: 5,
-        right: 0
+    listCompletedItem: {
+        borderColor: 'green',
+        borderLeftWidth: 10,
+        borderRightWidth: 5
     },
-
-    btnEdit: {
-        position: 'absolute',
-        right: 0,
-        top: 40
-    },
-
-    iconView: {
-        height: 40,
-        margin: 5
+    listImportantItem: {
+        borderColor: '#4b191b',
+        borderLeftWidth: 10,
+        borderRightWidth: 5
     },
     icon: {
         padding: 5
+    },
+    completed: {
+        textDecorationLine: 'line-through',
+        color: 'green',
+        fontWeight: 'bold'
+    },
+    smallText: {
+        fontSize: 22,
+        color: '#3b191b',
     }
 })

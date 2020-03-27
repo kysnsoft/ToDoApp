@@ -1,8 +1,10 @@
 import { combineReducers } from 'redux'
-import todos from './todos.js'
-import searchReducer from './search.js'
+import todos from './todos'
+import searchReducer from './search'
+import users from './users'
 
 export default combineReducers({
     todos,
-    searchReducer
+    searchReducer,
+    users
 })

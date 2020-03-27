@@ -1,25 +1,26 @@
-import React, { Component } from 'react'
+import React, { } from 'react'
 import {
-    Text,
     View,
-    StyleSheet
+    StyleSheet,
+    TouchableWithoutFeedback, Keyboard
 } from 'react-native'
 import DispatchTodo from './containers/DispatchTodo'
 
-class TodoApp extends Component {
+export default function TodoApp({ navigation }) {
 
-    render() {
-        return (
-            <View style={styles.container}>
-                <View>
-                    <DispatchTodo />
-                </View>
-            </View>
-        )
+    const navHandler = (id, taskParams) => {
+        navigation.navigate('TaskDetails', { id, taskParams })
     }
+
+    return (
+        <TouchableWithoutFeedback onPress={() => Keyboard.dismiss()}>
+            <View style={styles.container}>
+                <DispatchTodo navHandler={navHandler} />
+            </View>
+        </TouchableWithoutFeedback>
+    )
 }
 
-export default TodoApp;
 
 const styles = StyleSheet.create({
     container: {

@@ -1,53 +1,51 @@
-import React, { Component } from 'react'
+import React, { useState } from 'react'
 import {
-    StyleSheet,
     Text,
     View,
-    TextInput,
+    Modal,
     TouchableOpacity
 } from 'react-native'
 import Icon from 'react-native-vector-icons/Entypo'
-import { connect } from 'react-redux'
+import { useDispatch } from 'react-redux'
 import { addTodo } from '../actions'
+import TaskForm from './taskForm'
 
-class AddTodo extends Component {
+export default function AddTodo(props) {
 
-    state = {
-        text: ''
+    const { currentUser } = props
+
+    const [modalOpen, setModalOpen] = useState(false)
+    const dispatch = useDispatch()
+
+    const handleAdd = (task) => {
+        dispatch(addTodo(task, currentUser))
+        setModalOpen(false)
     }
 
-    addTodo = (text) => {
-        //redux store
-        if (text == "")
-            return alert('Field cannot be Empty')
-        this.props.dispatch(addTodo(text))
-        this.setState({ text: '' })
+    const handleCancel = () => {
+        setModalOpen(false)
     }
 
-    render() {
-        return (
-            <View style={{ flexDirection: 'row', marginHorizontal: 10 }}>
-                <TextInput
-                    onChangeText={(text) => this.setState({ text })}
-                    value={this.state.text}
-                    placeholder="What need to be done?"
-                    style={{
-                        borderWidth: 1,
-                        borderColor: '#f2f2e1',
-                        backgroundColor: '#eaeaea',
-                        height: 40, flex: 1, padding: 10, fontSize: 18, borderRadius: 10
-                    }}
-                />
-                <TouchableOpacity onPress={() => this.addTodo(this.state.text)}>
-                    <View style={{ height: 40, backgroundColor: '#eaeaea', borderRadius: 10 }}>
-                        <Icon size={30} color="#de9595" name="add-to-list"
-                            style={{ padding: 10, paddingTop: 5 }} />
+    return (
+        <View style={{ flex: 1, alignItems: 'space-around' }}>
+            <Modal visible={modalOpen} animationType="fade"
+                onRequestClose={() => setModalOpen(false)}>
+                <TaskForm handleAdd={handleAdd} handleCancel={handleCancel} />
+            </Modal>
+            <View style={{ width: '100%' }}>
+                <TouchableOpacity onPress={() => setModalOpen(true)}>
+                    <View style={{
+                        flexDirection: 'row', alignItems: 'center', backgroundColor: '#eee',
+                        borderRadius: 10, borderStyle: 'dashed', borderWidth: 1, borderColor: '#4b191b',
+                        padding: 5, margin: 5, justifyContent: 'center'
+                    }}>
+                        <Icon size={25} color="#4b191b" name="add-to-list"
+                            style={{ marginRight: 5 }} />
+                        <Text style={{ fontSize: 18, fontWeight: 'bold', color: '#49191b' }}>Add new Task</Text>
                     </View>
                 </TouchableOpacity>
             </View>
-
-        )
-    }
+        </View >
+    )
 }
 
-export default connect()(AddTodo);

@@ -1,4 +1,23 @@
-import { ADD_TODO, TOGGLE_TODO, DISPLAY_TODO, DELETE_TODO, EDIT_TODO, INCREASE_PRIOR, SEARCH_TODO } from './actionTypes'
+import { ADD_TODO, TOGGLE_TODO, DELETE_TODO, EDIT_TODO, IMPORTANT_TODO, SEARCH_TODO } from './actionTypes'
+import { LOGIN_USER, LOGOUT_USER, ADD_USER } from './actionTypes'
+
+
+export const loginUser = (userName, password) => ({
+    type: LOGIN_USER,
+    userName,
+    password
+})
+
+export const logoutUser = (userName) => ({
+    type: LOGOUT_USER,
+    userName
+})
+
+export const addUser = (userName, password) => ({
+    type: ADD_USER,
+    userName,
+    password
+})
 
 function guidGenerator() {
     var S4 = function () {
@@ -7,20 +26,17 @@ function guidGenerator() {
     return (S4() + S4() + "-" + S4() + "-" + S4() + "-" + S4() + "-" + S4() + S4() + S4());
 }
 
-export const addTodo = (text) => ({
+export const addTodo = (task, user) => ({
     type: ADD_TODO,
     id: guidGenerator(),
-    text
+    task,
+    user
 })
 
-export const toggleTodo = (id) => ({
+export const toggleTodo = (id, completeTime) => ({
     type: TOGGLE_TODO,
-    id
-})
-
-export const displayTodo = (id) => ({
-    type: DISPLAY_TODO,
-    id
+    id,
+    completeTime
 })
 
 export const deleteTodo = (id) => ({
@@ -28,14 +44,14 @@ export const deleteTodo = (id) => ({
     id
 })
 
-export const editTodo = (id, text) => ({
+export const editTodo = (id, taskParams) => ({
     type: EDIT_TODO,
     id,
-    text: text
+    task: taskParams
 })
 
-export const increasePrior = (id) => ({
-    type: INCREASE_PRIOR,
+export const importantTodo = (id) => ({
+    type: IMPORTANT_TODO,
     id
 })
 
